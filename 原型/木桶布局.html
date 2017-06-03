@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>木桶布局</title>
+	<style>
+		* {
+	      margin: 0;
+	      padding: 0;
+	    }
+	    .img-preview {
+	      width: 1000px;
+	      margin: 0 auto;
+	    }
+
+	    .img-row {
+	      margin-bottom: 8px;
+	    }
+
+	    .img-row:after {
+	      content: "";
+	      display: block;
+	      clear: both;
+	    }
+
+	    .img-box {
+	      float: left;
+	    }
+
+	    .img-line .img-box:first-child {
+	      padding-left: 0;
+	    }
+	</style>
+</head>
+<body>
+	<div class="img-preview">
+		
+	</div>
+	<p class="sign">sign</p>
+	<script src="jquery-1.11.1.min.js"></script>
+	<script>
+
+		function Barrel($ct){
+			this.$ct = $ct;
+			this.rowList = [];
+			this.loadImg();
+		}
+		Barrel.prototype = {
+			loadImg: function(){
+				var _this = this;
+				var imgUrls = this.getImgUrls(50);
+				/*$.each(imgUrls,function(idx, url){
+		          var img = new Image();
+		          img.src = url;
+		          img.onload = function(){
+		            var originWidth = img.width,
+		                originHeight = img.height,
+		                ratio = originWidth/originHeight;
+		            var imgInfo = {
+		              target: $(img),
+		              width: 100*ratio,
+		              height: 100,
+		            };
+		            _this.render(imgInfo);
+		          }
+		        });*/
+				for(var i=0;i<imgUrls.length;i++){
+					var img = new Image();
+					img.src = imgUrls[i];
+					img.onload = function(){
+						var originWidth = this.width,
+			                originHeight = this.height,
+			                ratio = originWidth/originHeight;
+						var imgInfo = {
+							target: $(this),
+							width: 100*ratio,
+							height: 100
+						}
+						_this.render(imgInfo)
+					}
+				}
+			},
+
+			render: function(imgInfo){
+				var _this = this
+				var clientWidth = this.$ct.width();
+				var rowWidth = 0;
+				var newRowHeight = 0;
+				var lastImgInfo = imgInfo;
+				var rowList = this.rowList;
+
+				this.rowList.push(imgInfo);
+
+				$.each(rowList,function(idx, imgInfo){
+		          rowWidth += imgInfo.width;
+		          if(rowWidth  > clientWidth ){
+		            rowList.pop();
+		            rowWidth = rowWidth - lastImgInfo.width;
+		            newRowHeight = clientWidth * 100 / rowWidth;
+		            
+		            _this.layout(newRowHeight);
+		            _this.rowList = [];
+		            _this.rowList.push(lastImgInfo);
+		          }
+        		});
+			},
+
+			layout: function(newRowHeight){
+				var $rowCt = $('<div class="img-row"></div>');
+				$.each(this.rowList,function(idx,imgInfo){
+					var $imgCt = $('<div class="img-box"></div>'),
+						$img = $(imgInfo.target);
+					$img.height(newRowHeight);
+					$imgCt.append($img);
+					$rowCt.append($imgCt);
+				});
+				console.log(this.$ct)
+				this.$ct.append($rowCt);
+			},
+
+			getImgUrls: function(num){
+				var color,width,height,urls = [];
+				for(var i=0;i<num;i++){
+					color = Math.random().toString(16).substring(2,8);
+					width = Math.floor(Math.random()*100+50);
+					height = Math.floor(Math.random()*30+50);
+					urls.push("http://placehold.it/"+width+'x'+height+'/'+color+'/fff');
+				}
+				return urls;
+			},
+		}
+		function isVisible($node){
+			console.log('isVisible($node)')
+			var $scrollHeight = $(window).scrollTop()
+			var $windowHeight = $(window).height()
+			var $nodeScrollTop = $node.offset().top
+			if ($nodeScrollTop<($scrollHeight+$windowHeight)) {
+				return true
+			}else{
+				return false
+			}
+		}
+		check()
+		function check(){
+			if (isVisible($('.sign'))) {
+				new Barrel($('.img-preview'))
+			}
+		}
+		$(window).on('scroll',function(){
+			check()
+		})
+		
+	</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>原型</title>
+</head>
+<body>
+	
+	<script src="jquery-1.11.1.min.js"></script>
+	<script>
+		function Person(name,age){
+			this.name = name;
+			this.age = age;
+		}
+		Person.prototype.sayHello = function(){
+			console.log('hello everyone this is '+this.name)
+		}
+		var p = new Person('youhuakun',20);
+		p.sayHello()
+	</script>
+</body>
+</html>
